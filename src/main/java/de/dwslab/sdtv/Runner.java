@@ -13,6 +13,7 @@ public class Runner {
 		MaterializeSDTypes materializeSDTypes = new MaterializeSDTypes();
 		MaterializeSDValidate materializeSDValidate = new MaterializeSDValidate();
 		try {
+
 			loadFiles.loadProperties(args[0]); 									//./enwiki-20151002-mappingbased-objects-uncleaned.ttl
 			loadFiles.createPropertyIndices();
 			loadFiles.loadTypes(args[1]); 										//./enwiki-20151002-instance-types-transitive.ttl
