@@ -1,9 +1,9 @@
 package de.dwslab.sdtv;
 
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
+import org.apache.commons.compress.compressors.CompressorInputStream;
+import org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream;
+
+import java.io.*;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -47,7 +47,7 @@ public class LoadFiles {
 		
 		long count = 0;
 		long errors = 0;
-		BufferedReader BR = new BufferedReader(new FileReader(filename));
+		BufferedReader BR = new BufferedReader(new InputStreamReader(new BZip2CompressorInputStream(new FileInputStream(filename))));
 		try {
 			stmt = conn.createStatement();
 		} catch (SQLException e) {
@@ -152,7 +152,7 @@ public class LoadFiles {
 		
 		long count = 0;
 		long errors = 0;
-		BufferedReader BR = new BufferedReader(new FileReader(filename));
+		BufferedReader BR = new BufferedReader(new InputStreamReader(new BZip2CompressorInputStream(new FileInputStream(filename))));
 		try {
 			stmt = conn.createStatement();
 		} catch (SQLException e) {
@@ -243,7 +243,7 @@ public class LoadFiles {
 		Collection<String> resources = new HashSet<String>();
 		long count = 0;
 		long errors = 0;
-		BufferedReader BR = new BufferedReader(new FileReader(fileName));
+		BufferedReader BR = new BufferedReader(new InputStreamReader(new BZip2CompressorInputStream(new FileInputStream(fileName))));
 		try {
 			stmt = conn.createStatement();
 		} catch (SQLException e) {
