@@ -1,5 +1,7 @@
 package de.dwslab.sdtv;
 
+import org.apache.commons.compress.compressors.CompressorException;
+
 import java.io.IOException;
 
 /**
@@ -7,7 +9,7 @@ import java.io.IOException;
  * @author Heiko
  */
 public class Runner {
-	public static void main(String[] args) {
+	public static void main(String[] args) throws CompressorException {
 		LoadFiles loadFiles = new LoadFiles();
 		ComputeBaseStatistics computeBaseStatistics = new ComputeBaseStatistics();
 		MaterializeSDTypes materializeSDTypes = new MaterializeSDTypes();

@@ -1,6 +1,8 @@
 package de.dwslab.sdtv;
 
+import org.apache.commons.compress.compressors.CompressorException;
 import org.apache.commons.compress.compressors.CompressorInputStream;
+import org.apache.commons.compress.compressors.CompressorStreamFactory;
 import org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream;
 
 import java.io.*;
@@ -25,7 +27,7 @@ public class LoadFiles {
 	 * @param filename
 	 * @throws IOException
 	 */
-	public void loadProperties(String filename) throws IOException {
+	public void loadProperties(String filename) throws IOException, CompressorException {
 		System.out.println("Property assertions: load started");
 		Connection conn = ConnectionManager.getConnection();
 		Statement stmt = null;
@@ -47,17 +49,17 @@ public class LoadFiles {
 		
 		long count = 0;
 		long errors = 0;
-		BufferedReader BR = new BufferedReader(new InputStreamReader(new BZip2CompressorInputStream(new FileInputStream(filename))));
+		BufferedReader BR = getBufferedReaderForCompressedFile(filename);
 		try {
 			stmt = conn.createStatement();
 		} catch (SQLException e) {
 			System.out.println("Error preparing insert");
 			e.printStackTrace();
 		}
-		while(BR.ready()) {
+		String line = BR.readLine();
+		while(line != null) {
 			boolean insert = false;
 			String sqlInsert = "INSERT INTO dbpedia_properties VALUES(";
-			String line = BR.readLine();
 			if(line.startsWith("#"))
 				continue;
 			line=line.replace("'","''");
@@ -130,7 +132,7 @@ public class LoadFiles {
 	 * @param filename
 	 * @throws IOException
 	 */
-	public void loadTypes(String filename) throws IOException {
+	public void loadTypes(String filename) throws IOException, CompressorException {
 		System.out.println("Type assertions: load started");
 		Connection conn = ConnectionManager.getConnection();
 		Statement stmt = null;
@@ -152,17 +154,17 @@ public class LoadFiles {
 		
 		long count = 0;
 		long errors = 0;
-		BufferedReader BR = new BufferedReader(new InputStreamReader(new BZip2CompressorInputStream(new FileInputStream(filename))));
+		BufferedReader BR = getBufferedReaderForCompressedFile(filename);
 		try {
 			stmt = conn.createStatement();
 		} catch (SQLException e) {
 			System.out.println("Error preparing insert");
 			e.printStackTrace();
 		}
-		while(BR.ready()) {
+		String line = BR.readLine();
+		while(line != null) {
 			boolean insert = false;
 			String sqlInsert = "INSERT INTO dbpedia_types VALUES(";
-			String line = BR.readLine();
 			if(line.startsWith("#"))
 				continue;
 			line=line.replace("'","''");
@@ -220,7 +222,7 @@ public class LoadFiles {
 		Util.createIndex("dbpedia_types", "type");
 	}
 	
-	public void loadDisambiguations(String fileName) throws IOException {
+	public void loadDisambiguations(String fileName) throws IOException, CompressorException {
 		System.out.println("Disambiguations: load started");
 		Connection conn = ConnectionManager.getConnection();
 		Statement stmt = null;
@@ -243,16 +245,16 @@ public class LoadFiles {
 		Collection<String> resources = new HashSet<String>();
 		long count = 0;
 		long errors = 0;
-		BufferedReader BR = new BufferedReader(new InputStreamReader(new BZip2CompressorInputStream(new FileInputStream(fileName))));
+		BufferedReader BR = getBufferedReaderForCompressedFile(fileName);
 		try {
 			stmt = conn.createStatement();
 		} catch (SQLException e) {
 			System.out.println("Error preparing insert");
 			e.printStackTrace();
 		}
-		while(BR.ready()) {
+		String line = BR.readLine();
+		while(line != null) {
 			boolean insert = false;
-			String line = BR.readLine();
 			if(line.startsWith("#"))
 				continue;
 			line=line.replace("'","''");
@@ -298,7 +300,7 @@ public class LoadFiles {
 	
 	}
 	
-	public void doLoad(String typeFileName, String propertyFileName, String disambiguationFileName) throws IOException {
+	public void doLoad(String typeFileName, String propertyFileName, String disambiguationFileName) throws IOException, CompressorException {
 		loadTypes(typeFileName);
 		createTypeIndices();
 		loadProperties(propertyFileName);
@@ -311,4 +313,11 @@ public class LoadFiles {
 		Util.createIndex("dbpedia_disambiguations", "resource");
 	}
 
+	public static BufferedReader getBufferedReaderForCompressedFile(String fileIn) throws FileNotFoundException, CompressorException {
+		FileInputStream fin = new FileInputStream(fileIn);
+		BufferedInputStream bis = new BufferedInputStream(fin);
+		CompressorInputStream input = new CompressorStreamFactory().createCompressorInputStream(bis);
+		BufferedReader br2 = new BufferedReader(new InputStreamReader(input));
+		return br2;
+	}
 }
